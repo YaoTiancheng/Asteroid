@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Asteroid.h"
 #include "WindowsApplication.h"
+#include "Util/ConsoleVariable.h"
 #include "Util/Debug.h"
 #include "Util/PlayerPrefs.h"
 #include "Util/SystemInfo.h"
@@ -115,13 +116,16 @@ namespace ASTEROID_NAMESPACE
         if (m_hWnd == NULL)
             return false;
 
+        ConsoleVariable<std::string>::SharedPtrType var = ConsoleVariable<std::string>::Create("Hello", true, "Fuck you");
+        ConsoleVariable<std::string>::SharedPtrType var1 = ConsoleVariable<std::string>::Create("Hello1", false, "Fuck you too");
+
         return true;
     }
 
     void WindowsApplication::Finalize()
     {
         DestroyWindow(m_hWnd);
-
+        ConsoleVariableManager::UnregisterAllVariables();
         PlayerPrefs::Save();
         Debug::Finalize();
     }

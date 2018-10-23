@@ -7,14 +7,75 @@ namespace ASTEROID_NAMESPACE
     class BaseConsoleVariable
     {
     public:
+        typedef std::shared_ptr<BaseConsoleVariable> SharedPtrType;
+
+    public:
+        BaseConsoleVariable(const std::string& name, bool isPersistent)
+            : m_Name(name), m_IsPersistent(isPersistent)
+        {
+        }
         virtual ~BaseConsoleVariable() = 0 {}
 
-        virtual void SaveAs(const std::string& name) const = 0;
-        virtual void LoadAs(const std::string& name) = 0;
-
-    private:
         virtual void ReadValue(std::istream& is) = 0;
         virtual void WriteValue(std::ostream& os) = 0;
+
+        const std::string& Name() const { return m_Name; }
+        bool IsPersistent() const { return m_IsPersistent; }
+
+        virtual void OnUnregister() const = 0;
+
+    protected:
+        std::string m_Name;
+        bool        m_IsPersistent;
+    };
+
+
+    class ConsoleVariableManager
+    {
+    public:
+        static void Register(BaseConsoleVariable::SharedPtrType pVar)
+        {
+            ASTEROID_ASSERT_F(_Variables.find(pVar->Name()) == _Variables.end(), 
+                "There is already a variable with name \"%s\" registered.", pVar->Name());
+            _Variables.insert(std::make_pair(pVar->Name(), pVar));
+        }
+
+        static void Unregister(const std::string& name)
+        {
+            auto it = _Variables.find(name);
+            if (it != _Variables.end())
+            {
+                it->second->OnUnregister();
+                _Variables.erase(it);
+            }
+        }
+
+        static bool HasVariable(const std::string& name)
+        {
+            return _Variables.find(name) != _Variables.end();
+        }
+
+        static BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name)
+        {
+            BaseConsoleVariable::SharedPtrType pVar = nullptr;
+            auto it = _Variables.find(name);
+            if (it != _Variables.end())
+                pVar = it->second;
+            return pVar;
+        }
+
+        static size_t VariablesCount() { return _Variables.size(); }
+
+        static void UnregisterAllVariables() 
+        { 
+            for (auto& it : _Variables)
+                it.second->OnUnregister();
+            _Variables.clear(); 
+        }
+
+    private:
+        using VariableMap = std::unordered_map<std::string, BaseConsoleVariable::SharedPtrType>;
+        static VariableMap  _Variables;
     };
 
 
@@ -22,77 +83,65 @@ namespace ASTEROID_NAMESPACE
     class ConsoleVariable : public BaseConsoleVariable
     {
     public:
-        explicit ConsoleVariable(const T& value) : m_Value(value) {}
-        virtual ~ConsoleVariable() {}
+        typedef std::shared_ptr<ConsoleVariable<T>> SharedPtrType;
 
-        virtual void SaveAs(const std::string& name) const override { PlayerPrefs::SetValue<T>(name, m_Value); }
-        virtual void LoadAs(const std::string& name) override { m_Value = PlayerPrefs::GetValue<T>(name, m_Value); }
-
-        T& operator T() { return m_Value; }
-
-    private:
-        virtual void ReadValue(std::istream& is) override { is >> m_Value; }
-        virtual void WriteValue(std::ostream& os) override { os << m_Value; }
-
-    private:
-        T m_Value;
-    };
-
-
-    template<typename T>
-    class SharedConsoleVariable
-    {
     public:
+        
 
-        struct ConsoleVariableContainer
+        static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue)
         {
-            BaseConsoleVariable*    var;
-            std::string             name;
-            bool                    isPersistent;
-            uint32_t                refCount;
-
-            SharedConsoleVariable(BaseConsoleVariable* var, const std::string& name, bool isPersistent)
-                : var(var), name(name), isPersistent(isPersistent), refCount(0)
+            BaseConsoleVariable::SharedPtrType regVar = ConsoleVariableManager::FindVariable(name);
+            if (regVar == nullptr)
             {
-            }
-
-            ~ConsoleVariableContainer()
-            {
-                ASTEROID_DELETE var;
-            }
-        };
-
-        static SharedConsoleVariable Get(const std::string& name, const T& defaultValue, bool isPersistent)
-        {
-            auto it = _Variables.find(name);
-            if (it == _Variables.end())
-            {
-                ConsoleVariableContainer container;
-                container.var = ASTEROID_NEW ConsoleVariable<T>(defaultValue);
-                container.name = name;
-                container.isPersistent = isPersistent;
-                container.refCount = 0;
-                _Variables.insert(std::make_pair(name, container));
-
-                if (isPersistent)
-                    container.var->LoadAs(name);
+                SharedPtrType var = std::make_shared<ConsoleVariable<T>>(name, isPersistent, defaultValue);
+                ConsoleVariableManager::Register(var);
+                var->OnRegister(defaultValue);
+                return var;
             }
             else
             {
+                SharedPtrType var = nullptr;
+                if (regVar->IsPersistent() == isPersistent)
+                {
+                    var = std::dynamic_pointer_cast<ConsoleVariable<T>>(regVar);
+                    if (var == nullptr)
+                        ASTEROID_LOG_ERROR_F("There is already a variable with name \"%s\" registered but it's a different type.", name);
+                }
+                else
+                {
+                    ASTEROID_LOG_ERROR_F("There is already a variable with name \"%s\" registered but it has different persistency property.", name);
+                }
+                return var;
             }
         }
 
-    private:
-        explicit SharedConsoleVariable(ConsoleVariable<T>& var, uint32_t* refCount)
-            : m_Var(var), m_RefCount(refCount)
+        ConsoleVariable(const std::string& name, bool isPersistent, const T& value)
+            : BaseConsoleVariable(name, isPersistent), m_Value(value)
         {
         }
 
+        virtual ~ConsoleVariable() 
+        {
+        }
+
+        operator T&() { return m_Value; }
+
+        virtual void ReadValue(std::istream& is) override { is >> m_Value; }
+        virtual void WriteValue(std::ostream& os) override { os << m_Value; }
+
+        void OnRegister(const T& defaultValue) 
+        {
+            if (m_IsPersistent)
+                m_Value = PlayerPrefs::GetValue<T>(m_Name, defaultValue); 
+        }
+        virtual void OnUnregister() const override 
+        {
+            if (m_IsPersistent)
+                PlayerPrefs::SetValue<T>(m_Name, m_Value); 
+        }
+
     private:
-        using VariableMap = std::unordered_map<std::string, ConsoleVariableContainer>;
-        static VariableMap  _Variables;
-        uint32_t*           m_RefCount;
-        ConsoleVariable<T>& m_Var;
+        T m_Value;
     };
 
 
