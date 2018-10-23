@@ -57,6 +57,10 @@ namespace ASTEROID_NAMESPACE
     WindowsApplication::WindowsApplication(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR cmdLine, int cmdShow)
         : m_hInstance(hInstance), m_CmdShow(cmdShow)
     {
+#ifdef _DEBUG
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
         ASTEROID_ASSERT(_Singleton == nullptr, "There is already a singleton created.");
         _Singleton = this;
     }
