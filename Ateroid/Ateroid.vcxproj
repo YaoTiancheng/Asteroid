@@ -172,6 +172,7 @@
     <ClInclude Include="Precompile.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Util\Archives.h" />
+    <ClInclude Include="Util\ConsoleVariable.h" />
     <ClInclude Include="Util\Debug.h" />
     <ClInclude Include="Util\PlayerPrefs.h" />
     <ClInclude Include="Util\String.h" />
@@ -197,6 +198,7 @@
     </ClCompile>
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\RenderSystem.cpp" />
+    <ClCompile Include="Util\ConsoleVariable.cpp" />
     <ClCompile Include="Util\Debug.cpp" />
     <ClCompile Include="Util\PlayerPrefs.cpp" />
     <ClCompile Include="Util\SystemInfo.cpp" />

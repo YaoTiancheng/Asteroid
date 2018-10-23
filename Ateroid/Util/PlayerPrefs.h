@@ -158,6 +158,79 @@ namespace ASTEROID_NAMESPACE
                 _StringValues.insert(std::make_pair(name, value));
         }
 
+        /**
+         *  A function template for get value of type T by name.
+         *  This function template is specialized for each specific supported types,
+         *  Instantiation using any other non-supported type will result a compile time error.
+         */
+        template <typename T>
+        static T GetValue(const std::string& name, const T& defaultValue)
+        {
+            static_assert(false, "GetValue with type T is not supported.");
+        }
+        /**
+         *  A function template for set value of type T by name.
+         *  This function template is specialized for each specific supported types,
+         *  Instantiation using any other non-supported type will result a compile time error.
+         */
+        template <typename T>
+        static void SetValue(const std::string& name, const T& value)
+        {
+            static_assert(false, "SetValue with type T is not supported.");
+        }
+
+        /**
+         *  Generic version of PlayerPrefs::GetInteger
+         */
+        template <>
+        static int GetValue<int>(const std::string& name, const int& defaultValue)
+        {
+            return GetInteger(name, defaultValue);
+        }
+        /**
+         *  Generic version of PlayerPrefs::SetInteger
+         */
+        template <>
+        static void SetValue<int>(const std::string& name, const int& value)
+        {
+            SetInteger(name, value);
+        }
+
+        /**
+         *  Generic version of PlayerPrefs::GetSingle
+         */
+        template <>
+        static float GetValue<float>(const std::string& name, const float& defaultValue)
+        {
+            return GetSingle(name, defaultValue);
+        }
+        /**
+         *  Generic version of PlayerPrefs::SetSingle
+         */
+        template <>
+        static void SetValue<float>(const std::string& name, const float& value)
+        {
+            SetSingle(name, value);
+        }
+
+        /**
+         *  Generic version of PlayerPrefs::GetString
+         */
+        template <>
+        static std::string GetValue<std::string>(const std::string& name, const std::string& defaultValue)
+        {
+            return GetString(name, defaultValue);
+        }
+        /**
+         *  Generic version of PlayerPrefs::SetString
+         */
+        template <>
+        static void SetValue<std::string>(const std::string& name, const std::string& value)
+        {
+            SetString(name, value);
+        }
+
+
     private:
         static NamedValueMap<int32_t>      _IntegerValues;
         static NamedValueMap<float>        _SingleValues;
