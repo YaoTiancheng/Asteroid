@@ -34,7 +34,6 @@ namespace ASTEROID_NAMESPACE
         vsnprintf(gLogStringFormatBuffer, Debug::kMaxLogStringByteLength, format, args);
         ss << gLogStringFormatBuffer << std::endl;
 
-        // Print stack trace if stack trace is forced or log type is an error or an assertion.
         if (forceStackTrace)
         {
             StackTrace st;
@@ -52,7 +51,6 @@ namespace ASTEROID_NAMESPACE
         std::ostringstream ss;
         ss << kLogTypeNames[(int)type] << ' ' << buffer << std::endl;
 
-        // Print stack trace if stack trace is forced or log type is an error or an assertion.
         if (forceStackTrace)
         {
             StackTrace st;
