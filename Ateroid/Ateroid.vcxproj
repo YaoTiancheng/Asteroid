@@ -23,7 +23,7 @@
     <ProjectGuid>{B0381AAB-56EF-4536-A179-5200E1D49046}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Ateroid</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <ProjectName>Asteroid</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
