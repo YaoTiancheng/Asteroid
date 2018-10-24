@@ -22,7 +22,7 @@ namespace ASTEROID_NAMESPACE
         const std::string& Name() const { return m_Name; }
         bool IsPersistent() const { return m_IsPersistent; }
 
-        virtual void OnUnregister() const = 0;
+        virtual void OnUnregister(PlayerPrefs* playerPrefs) const = 0;
 
     protected:
         std::string m_Name;
@@ -33,29 +33,44 @@ namespace ASTEROID_NAMESPACE
     class ConsoleVariableManager
     {
     public:
-        static void Register(BaseConsoleVariable::SharedPtrType pVar)
+        static ConsoleVariableManager* Create(PlayerPrefs* playerPrefs)
+        {
+            ASTEROID_ASSERT_F(_Singleton == nullptr, "There is already a ConsoleVariableManager singleton created.");
+            _Singleton = ASTEROID_NEW ConsoleVariableManager(playerPrefs);
+            return _Singleton;
+        }
+
+        static void Destroy()
+        {
+            ASTEROID_DELETE(_Singleton);
+            _Singleton = nullptr;
+        }
+
+        static ConsoleVariableManager* Singleton() { return _Singleton; }
+
+        void Register(BaseConsoleVariable::SharedPtrType pVar)
         {
             ASTEROID_ASSERT_F(_Variables.find(pVar->Name()) == _Variables.end(), 
                 "There is already a variable with name \"%s\" registered.", pVar->Name());
             _Variables.insert(std::make_pair(pVar->Name(), pVar));
         }
 
-        static void Unregister(const std::string& name)
+        void Unregister(const std::string& name)
         {
             auto it = _Variables.find(name);
             if (it != _Variables.end())
             {
-                it->second->OnUnregister();
+                it->second->OnUnregister(m_PlayerPrefs);
                 _Variables.erase(it);
             }
         }
 
-        static bool HasVariable(const std::string& name)
+        bool HasVariable(const std::string& name)
         {
             return _Variables.find(name) != _Variables.end();
         }
 
-        static BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name)
+        BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name)
         {
             BaseConsoleVariable::SharedPtrType pVar = nullptr;
             auto it = _Variables.find(name);
@@ -64,18 +79,29 @@ namespace ASTEROID_NAMESPACE
             return pVar;
         }
 
-        static size_t VariablesCount() { return _Variables.size(); }
+        size_t VariablesCount() { return _Variables.size(); }
 
-        static void UnregisterAllVariables() 
+        void UnregisterAllVariables() 
         { 
             for (auto& it : _Variables)
-                it.second->OnUnregister();
+                it.second->OnUnregister(m_PlayerPrefs);
             _Variables.clear(); 
         }
 
+        PlayerPrefs* GetPlayerPrefs() const { return m_PlayerPrefs; }
+
     private:
+        ConsoleVariableManager(PlayerPrefs* playerPrefs)
+            : m_PlayerPrefs(playerPrefs)
+        {
+        }
+
+    private:
+        static ConsoleVariableManager* _Singleton;
+
         using VariableMap = std::unordered_map<std::string, BaseConsoleVariable::SharedPtrType>;
-        static VariableMap  _Variables;
+        VariableMap     _Variables;
+        PlayerPrefs*    m_PlayerPrefs;
     };
 
 
@@ -87,15 +113,19 @@ namespace ASTEROID_NAMESPACE
 
     public:
         
-
         static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue)
         {
-            BaseConsoleVariable::SharedPtrType regVar = ConsoleVariableManager::FindVariable(name);
+            return Create(name, isPersistent, defaultValue, ConsoleVariableManager::Singleton());
+        }
+
+        static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue, ConsoleVariableManager* consoleVariableManager)
+        {
+            BaseConsoleVariable::SharedPtrType regVar = consoleVariableManager->FindVariable(name);
             if (regVar == nullptr)
             {
                 SharedPtrType var = std::make_shared<ConsoleVariable<T>>(name, isPersistent, defaultValue);
-                ConsoleVariableManager::Register(var);
-                var->OnRegister(defaultValue);
+                consoleVariableManager->Register(var);
+                var->OnRegister(consoleVariableManager->GetPlayerPrefs(), defaultValue);
                 return var;
             }
             else
@@ -115,6 +145,8 @@ namespace ASTEROID_NAMESPACE
             }
         }
 
+       
+
         ConsoleVariable(const std::string& name, bool isPersistent, const T& value)
             : BaseConsoleVariable(name, isPersistent), m_Value(value)
         {
@@ -129,15 +161,15 @@ namespace ASTEROID_NAMESPACE
         virtual void ReadValue(std::istream& is) override { is >> m_Value; }
         virtual void WriteValue(std::ostream& os) override { os << m_Value; }
 
-        void OnRegister(const T& defaultValue) 
+        void OnRegister(PlayerPrefs* playerPrefs, const T& defaultValue)
         {
             if (m_IsPersistent)
-                m_Value = PlayerPrefs::GetValue<T>(m_Name, defaultValue); 
+                m_Value = playerPrefs->GetValue<T>(m_Name, defaultValue);
         }
-        virtual void OnUnregister() const override 
+        virtual void OnUnregister(PlayerPrefs* playerPrefs) const override
         {
             if (m_IsPersistent)
-                PlayerPrefs::SetValue<T>(m_Name, m_Value); 
+                playerPrefs->SetValue<T>(m_Name, m_Value);
         }
 
     private:

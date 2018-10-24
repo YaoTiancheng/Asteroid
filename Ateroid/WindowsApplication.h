@@ -2,6 +2,10 @@
 
 namespace ASTEROID_NAMESPACE
 {
+    class ConsoleVariableManager;
+    class PlayerPrefs;
+    
+
     /**
      *  Root caller on windows platform.
      *  Engine initialize/finalize, window management, runs message loop & engine loop, etc.

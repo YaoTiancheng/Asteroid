@@ -5,19 +5,16 @@
 
 namespace ASTEROID_NAMESPACE
 {
-    PlayerPrefs::NamedValueMap<int32_t>     PlayerPrefs::_IntegerValues;
-    PlayerPrefs::NamedValueMap<float>       PlayerPrefs::_SingleValues;
-    PlayerPrefs::NamedValueMap<std::string> PlayerPrefs::_StringValues;
-
     static const char kPlayerPrefsFilename[] = "PlayerPrefs.json";
+    PlayerPrefs* PlayerPrefs::_Singleton = nullptr;
 
     void PlayerPrefs::Save()
     {
         std::ofstream fs(kPlayerPrefsFilename);
         JSONOutputArchive archive(fs);
-        archive(ASTEROID_ARCHIVE_MAKE_NVP("Integers", _IntegerValues));
-        archive(ASTEROID_ARCHIVE_MAKE_NVP("Singles", _SingleValues));
-        archive(ASTEROID_ARCHIVE_MAKE_NVP("Strings", _StringValues));
+        archive(ASTEROID_ARCHIVE_MAKE_NVP("Integers", m_IntegerValues));
+        archive(ASTEROID_ARCHIVE_MAKE_NVP("Singles", m_SingleValues));
+        archive(ASTEROID_ARCHIVE_MAKE_NVP("Strings", m_StringValues));
     }
 
     bool PlayerPrefs::Load()
@@ -26,9 +23,9 @@ namespace ASTEROID_NAMESPACE
         if (fs)
         {
             JSONInputArchive archive(fs);
-            archive(ASTEROID_ARCHIVE_MAKE_NVP("Integers", _IntegerValues));
-            archive(ASTEROID_ARCHIVE_MAKE_NVP("Singles", _SingleValues));
-            archive(ASTEROID_ARCHIVE_MAKE_NVP("Strings", _StringValues));
+            archive(ASTEROID_ARCHIVE_MAKE_NVP("Integers", m_IntegerValues));
+            archive(ASTEROID_ARCHIVE_MAKE_NVP("Singles", m_SingleValues));
+            archive(ASTEROID_ARCHIVE_MAKE_NVP("Strings", m_StringValues));
             return true;
         }
         ASTEROID_LOG_INFO_F("Open PlayerPref file \"%s\" failed with err \"%s\"",

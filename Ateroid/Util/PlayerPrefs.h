@@ -19,8 +19,33 @@ namespace ASTEROID_NAMESPACE
         using NamedValueMap = std::unordered_map<std::string, T>;
 
     public:
-        ASTEROID_NO_DEFAULT_CTOR(PlayerPrefs)
         ASTEROID_NON_COPYABLE(PlayerPrefs)
+
+        /**
+         *  Create a PlayerPrefs singleton.
+         */
+        static PlayerPrefs* Create()
+        {
+            ASTEROID_ASSERT(_Singleton == nullptr, "There is already a PlayerPrefs singleton created.");
+            _Singleton = ASTEROID_NEW PlayerPrefs();
+            return _Singleton;
+        }
+
+        /**
+         *  Destroy the current PlayerPrefs singleton.
+         */
+        static void Destroy()
+        {
+            ASTEROID_DELETE _Singleton;
+            _Singleton = nullptr;
+        }
+
+        /**
+         *  Current created singleton.
+         *  @return
+         *      Instance of current created singleton. nullptr if no instance created or singleton was destroyed.
+         */
+        static PlayerPrefs* Singleton() { return _Singleton; }
 
         /**
          *  Load all values from local storage.\n
@@ -28,12 +53,12 @@ namespace ASTEROID_NAMESPACE
          *  @return
          *      True if succeeded. Otherwise false.
          */
-        static bool Load();
+        bool Load();
 
         /**
          *  Write all values to local storage.
          */
-        static void Save();
+        void Save();
 
         /**
          *  Get a integer value by name.
@@ -47,14 +72,14 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the defauled value.
          */
-        static int32_t GetInteger(const std::string& name, int32_t defaultValue = 0)
+        int32_t GetInteger(const std::string& name, int32_t defaultValue = 0)
         {
             int32_t value = defaultValue;
-            auto it = _IntegerValues.find(name);
-            if (it != _IntegerValues.end())
+            auto it = m_IntegerValues.find(name);
+            if (it != m_IntegerValues.end())
                 value = it->second;
             else
-                _IntegerValues.insert(std::make_pair(name, defaultValue));
+                m_IntegerValues.insert(std::make_pair(name, defaultValue));
             return value;
         }
         /**
@@ -67,13 +92,13 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the given value.
          */
-        static void SetInteger(const std::string& name, int32_t value)
+        void SetInteger(const std::string& name, int32_t value)
         {
-            auto it = _IntegerValues.find(name);
-            if (it != _IntegerValues.end())
+            auto it = m_IntegerValues.find(name);
+            if (it != m_IntegerValues.end())
                 it->second = value;
             else
-                _IntegerValues.insert(std::make_pair(name, value));
+                m_IntegerValues.insert(std::make_pair(name, value));
         }
 
         /**
@@ -88,14 +113,14 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the defauled value.
          */
-        static float GetSingle(const std::string& name, float defaultValue = 0.0f)
+        float GetSingle(const std::string& name, float defaultValue = 0.0f)
         {
             float value = defaultValue;
-            auto it = _SingleValues.find(name);
-            if (it != _SingleValues.end())
+            auto it = m_SingleValues.find(name);
+            if (it != m_SingleValues.end())
                 value = it->second;
             else
-                _SingleValues.insert(std::make_pair(name, defaultValue));
+                m_SingleValues.insert(std::make_pair(name, defaultValue));
             return value;
         }
         /**
@@ -108,13 +133,13 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the given value.
          */
-        static void SetSingle(const std::string& name, float value)
+        void SetSingle(const std::string& name, float value)
         {
-            auto it = _SingleValues.find(name);
-            if (it != _SingleValues.end())
+            auto it = m_SingleValues.find(name);
+            if (it != m_SingleValues.end())
                 it->second = value;
             else
-                _SingleValues.insert(std::make_pair(name, value));
+                m_SingleValues.insert(std::make_pair(name, value));
         }
 
         /**
@@ -129,14 +154,14 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the defauled value.
          */
-        static std::string GetString(const std::string& name, const std::string& defaultValue = "")
+        std::string GetString(const std::string& name, const std::string& defaultValue = "")
         {
             std::string value = defaultValue;
-            auto it = _StringValues.find(name);
-            if (it != _StringValues.end())
+            auto it = m_StringValues.find(name);
+            if (it != m_StringValues.end())
                 value = it->second;
             else
-                _StringValues.insert(std::make_pair(name, defaultValue));
+                m_StringValues.insert(std::make_pair(name, defaultValue));
             return value;
         }
         /**
@@ -149,13 +174,13 @@ namespace ASTEROID_NAMESPACE
          *      If the function failed to find a value by the given name then a new value with the given
          *      name is created and initialized to the given value.
          */
-        static void SetString(const std::string& name, const std::string& value)
+        void SetString(const std::string& name, const std::string& value)
         {
-            auto it = _StringValues.find(name);
-            if (it != _StringValues.end())
+            auto it = m_StringValues.find(name);
+            if (it != m_StringValues.end())
                 it->second = value;
             else
-                _StringValues.insert(std::make_pair(name, value));
+                m_StringValues.insert(std::make_pair(name, value));
         }
 
         /**
@@ -164,7 +189,7 @@ namespace ASTEROID_NAMESPACE
          *  Instantiation using any other non-supported type will result a compile time error.
          */
         template <typename T>
-        static T GetValue(const std::string& name, const T& defaultValue)
+        T GetValue(const std::string& name, const T& defaultValue)
         {
             static_assert(false, "GetValue with type T is not supported.");
         }
@@ -174,7 +199,7 @@ namespace ASTEROID_NAMESPACE
          *  Instantiation using any other non-supported type will result a compile time error.
          */
         template <typename T>
-        static void SetValue(const std::string& name, const T& value)
+        void SetValue(const std::string& name, const T& value)
         {
             static_assert(false, "SetValue with type T is not supported.");
         }
@@ -183,7 +208,7 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::GetInteger
          */
         template <>
-        static int GetValue<int>(const std::string& name, const int& defaultValue)
+        int GetValue<int>(const std::string& name, const int& defaultValue)
         {
             return GetInteger(name, defaultValue);
         }
@@ -191,7 +216,7 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::SetInteger
          */
         template <>
-        static void SetValue<int>(const std::string& name, const int& value)
+        void SetValue<int>(const std::string& name, const int& value)
         {
             SetInteger(name, value);
         }
@@ -200,7 +225,7 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::GetSingle
          */
         template <>
-        static float GetValue<float>(const std::string& name, const float& defaultValue)
+        float GetValue<float>(const std::string& name, const float& defaultValue)
         {
             return GetSingle(name, defaultValue);
         }
@@ -208,7 +233,7 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::SetSingle
          */
         template <>
-        static void SetValue<float>(const std::string& name, const float& value)
+        void SetValue<float>(const std::string& name, const float& value)
         {
             SetSingle(name, value);
         }
@@ -217,7 +242,7 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::GetString
          */
         template <>
-        static std::string GetValue<std::string>(const std::string& name, const std::string& defaultValue)
+        std::string GetValue<std::string>(const std::string& name, const std::string& defaultValue)
         {
             return GetString(name, defaultValue);
         }
@@ -225,16 +250,21 @@ namespace ASTEROID_NAMESPACE
          *  Generic version of PlayerPrefs::SetString
          */
         template <>
-        static void SetValue<std::string>(const std::string& name, const std::string& value)
+        void SetValue<std::string>(const std::string& name, const std::string& value)
         {
             SetString(name, value);
         }
 
+    private:
+        PlayerPrefs() = default;
 
     private:
-        static NamedValueMap<int32_t>      _IntegerValues;
-        static NamedValueMap<float>        _SingleValues;
-        static NamedValueMap<std::string>  _StringValues;
+        static PlayerPrefs* _Singleton;
+
+    private:
+        NamedValueMap<int32_t>      m_IntegerValues;
+        NamedValueMap<float>        m_SingleValues;
+        NamedValueMap<std::string>  m_StringValues;
     };
     
 }

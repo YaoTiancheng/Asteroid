@@ -105,11 +105,15 @@ namespace ASTEROID_NAMESPACE
             ASTEROID_LOG_ERROR("Application init failed: SystemInfo init failed.");
             return false;
         }
-        if (!PlayerPrefs::Load())
+
+        PlayerPrefs::Create();
+        if (!PlayerPrefs::Singleton()->Load())
         {
             // PlayerPrefs load failed for some reason. Just print a log and continue.
             ASTEROID_LOG_INFO("PlayerPrefs::Load failed.");
         }
+
+        ConsoleVariableManager::Create(PlayerPrefs::Singleton());
 
         RegisterMainWindowClass(m_hInstance);
         m_hWnd = CreateMainWindow(m_hInstance, m_CmdShow);
@@ -125,8 +129,20 @@ namespace ASTEROID_NAMESPACE
     void WindowsApplication::Finalize()
     {
         DestroyWindow(m_hWnd);
-        ConsoleVariableManager::UnregisterAllVariables();
-        PlayerPrefs::Save();
+
+        if (ConsoleVariableManager::Singleton())
+        {
+            // Unregister all variables, all persistent variables will be saved.
+            ConsoleVariableManager::Singleton()->UnregisterAllVariables();
+            ConsoleVariableManager::Destroy();
+        }
+
+        if (PlayerPrefs::Singleton())
+        {
+            PlayerPrefs::Singleton()->Save();
+            PlayerPrefs::Destroy();
+        }
+
         Debug::Finalize();
     }
 

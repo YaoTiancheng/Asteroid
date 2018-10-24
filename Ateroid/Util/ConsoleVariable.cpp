@@ -4,5 +4,5 @@
 
 namespace ASTEROID_NAMESPACE
 {
-    ConsoleVariableManager::VariableMap ConsoleVariableManager::_Variables;
+    ConsoleVariableManager* ConsoleVariableManager::_Singleton = nullptr;
 }
