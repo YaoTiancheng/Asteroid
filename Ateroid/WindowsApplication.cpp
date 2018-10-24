@@ -122,6 +122,8 @@ namespace ASTEROID_NAMESPACE
 
         ConsoleVariable<std::string>::SharedPtrType var = ConsoleVariable<std::string>::Create("Hello", true, "Fuck you");
         ConsoleVariable<std::string>::SharedPtrType var1 = ConsoleVariable<std::string>::Create("Hello1", false, "Fuck you too");
+        ConsoleVariable<int32_t>::SharedPtrType var2 = ConsoleVariable<int32_t>::Create("Hello2", true, 18);
+        int32_t a = (*var2) + 6;
 
         return true;
     }

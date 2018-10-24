@@ -4,8 +4,13 @@
 
 namespace ASTEROID_NAMESPACE
 {
+    /**
+     *  Base class for abstract console variable manipulation.
+     */
     class BaseConsoleVariable
     {
+        friend class ConsoleVariableManager;
+
     public:
         typedef std::shared_ptr<BaseConsoleVariable> SharedPtrType;
 
@@ -16,12 +21,16 @@ namespace ASTEROID_NAMESPACE
         }
         virtual ~BaseConsoleVariable() = 0 {}
 
+        /** Read value from a input stream. */
         virtual void ReadValue(std::istream& is) = 0;
+        /** Write value to an output stream. */
         virtual void WriteValue(std::ostream& os) = 0;
 
-        const std::string& Name() const { return m_Name; }
-        bool IsPersistent() const { return m_IsPersistent; }
+        const std::string&  Name() const { return m_Name; }
+        bool                IsPersistent() const { return m_IsPersistent; }
 
+    private:
+        /** Called when this variable is unregistered from ConsoleVariableManager. */
         virtual void OnUnregister(PlayerPrefs* playerPrefs) const = 0;
 
     protected:
@@ -30,9 +39,16 @@ namespace ASTEROID_NAMESPACE
     };
 
 
+    /**
+     *  A global manager class that manages all registered console variable in the game.
+     *  Every console variable is registered, searched and unregistered by a unique name.
+     */
     class ConsoleVariableManager
     {
     public:
+        /**
+         *  Create a singleton of ConsoleVariableManager
+         */
         static ConsoleVariableManager* Create(PlayerPrefs* playerPrefs)
         {
             ASTEROID_ASSERT_F(_Singleton == nullptr, "There is already a ConsoleVariableManager singleton created.");
@@ -40,58 +56,105 @@ namespace ASTEROID_NAMESPACE
             return _Singleton;
         }
 
+        /**
+         *  Destroy the previous created ConsoleVariableManager singleton.
+         */
         static void Destroy()
         {
             ASTEROID_DELETE(_Singleton);
             _Singleton = nullptr;
         }
 
+        /**
+         *  Get the previous created singleton.
+         *  @return
+         *      Instance of the singleton. nullptr if not created or destroyed.
+         */
         static ConsoleVariableManager* Singleton() { return _Singleton; }
 
+        /**
+         *  Register a variable with a unique name.
+         *  @param pVar
+         *      The variable going to be registered.
+         *  @remark
+         *      The name of the variable must not be a name already used by another registered variable.
+         *      Otherwise this function raises an exception.
+         */
         void Register(BaseConsoleVariable::SharedPtrType pVar)
         {
-            ASTEROID_ASSERT_F(_Variables.find(pVar->Name()) == _Variables.end(), 
+            ASTEROID_ASSERT_F(m_Variables.find(pVar->Name()) == m_Variables.end(), 
                 "There is already a variable with name \"%s\" registered.", pVar->Name());
-            _Variables.insert(std::make_pair(pVar->Name(), pVar));
+            m_Variables.insert(std::make_pair(pVar->Name(), pVar));
         }
 
+        /**
+         *  Unregister a variable with a unique name.
+         *  @param name
+         *      The variable's name.
+         *  @remark
+         *      If variable with this given name doesn't exist, this function does nothing.
+         *      Otherwise, it will remove the variable from the global variable registery.
+         *      Calling this function will cause a persistent variable to save its value, and any
+         *      afterwards changes of it will not be saved.\n
+         *      The variable being unregistered will not be searched globally through 
+         *      ConsoleVariableManager any longer.
+         */
         void Unregister(const std::string& name)
         {
-            auto it = _Variables.find(name);
-            if (it != _Variables.end())
+            auto it = m_Variables.find(name);
+            if (it != m_Variables.end())
             {
                 it->second->OnUnregister(m_PlayerPrefs);
-                _Variables.erase(it);
+                m_Variables.erase(it);
             }
         }
 
-        bool HasVariable(const std::string& name)
+        /**
+         *  Check if a variable with the given name is registered.
+         */
+        bool HasVariable(const std::string& name) const
         {
-            return _Variables.find(name) != _Variables.end();
+            return m_Variables.find(name) != m_Variables.end();
         }
 
-        BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name)
+        /**
+         *  Find a registered variable with given name.
+         *  @return
+         *      Registered variable with given name. nullptr if not found.
+         */
+        BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name) const
         {
             BaseConsoleVariable::SharedPtrType pVar = nullptr;
-            auto it = _Variables.find(name);
-            if (it != _Variables.end())
+            auto it = m_Variables.find(name);
+            if (it != m_Variables.end())
                 pVar = it->second;
             return pVar;
         }
 
-        size_t VariablesCount() { return _Variables.size(); }
+        /**
+         *  Numbers of currently registered variables.
+         */
+        size_t VariablesCount() const { return m_Variables.size(); }
 
+        /**
+         *  Unregister all registered variables.
+         *  @remarks
+         *      Calling this function is equivalent with calling ConsoleVariableManager::Unregister on each registered variable.
+         */
         void UnregisterAllVariables() 
         { 
-            for (auto& it : _Variables)
+            for (auto& it : m_Variables)
                 it.second->OnUnregister(m_PlayerPrefs);
-            _Variables.clear(); 
+            m_Variables.clear(); 
         }
 
+        /**
+         *  The PlayerPrefs instance this manager used to save persistent variables.
+         */
         PlayerPrefs* GetPlayerPrefs() const { return m_PlayerPrefs; }
 
     private:
-        ConsoleVariableManager(PlayerPrefs* playerPrefs)
+        explicit ConsoleVariableManager(PlayerPrefs* playerPrefs)
             : m_PlayerPrefs(playerPrefs)
         {
         }
@@ -100,7 +163,7 @@ namespace ASTEROID_NAMESPACE
         static ConsoleVariableManager* _Singleton;
 
         using VariableMap = std::unordered_map<std::string, BaseConsoleVariable::SharedPtrType>;
-        VariableMap     _Variables;
+        VariableMap     m_Variables;
         PlayerPrefs*    m_PlayerPrefs;
     };
 
