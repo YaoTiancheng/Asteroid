@@ -78,7 +78,7 @@ namespace ASTEROID_NAMESPACE
          *      The variable going to be registered.
          *  @remark
          *      The name of the variable must not be a name already used by another registered variable.
-         *      Otherwise this function raises an exception.
+         *      Otherwise this function does nothing.
          */
         void Register(BaseConsoleVariable::SharedPtrType pVar)
         {
@@ -93,7 +93,7 @@ namespace ASTEROID_NAMESPACE
          *      The variable's name.
          *  @remark
          *      If variable with this given name doesn't exist, this function does nothing.
-         *      Otherwise, it will remove the variable from the global variable registery.
+         *      Otherwise, it will remove the variable from the global variable registry.\n
          *      Calling this function will cause a persistent variable to save its value, and any
          *      afterwards changes of it will not be saved.\n
          *      The variable being unregistered will not be searched globally through 
@@ -168,6 +168,9 @@ namespace ASTEROID_NAMESPACE
     };
 
 
+    /**
+     *  Class template for class inherited from BaseConsoleVariable which wraps different type.
+     */
     template<typename T>
     class ConsoleVariable : public BaseConsoleVariable
     {
@@ -175,12 +178,29 @@ namespace ASTEROID_NAMESPACE
         typedef std::shared_ptr<ConsoleVariable<T>> SharedPtrType;
 
     public:
-        
-        static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue)
+        ASTEROID_NON_COPYABLE(ConsoleVariable)
+
+        /**
+         *  Create and register a console variable.
+         *  @return
+         *      Registered matching console variable if it is found. nullptr if name is registered by another console variable with
+         *      different persistency or type. New console variable if the name is not used by any registered console variable.
+         *  @remarks
+         *      If the name, persistency and type is matching with a current registered console variable,
+         *      calling this function will not create a new one but simply get the previously registered one.\n
+         *      If the name is matching with a current registered console variable but persistency or type is different,
+         *      calling this function will not create any console variable and returns nullptr.\n
+         *      If the name doesn't match any registered console variables, calling this function will create a new console variable,
+         *      assign it a default value and register it.
+         */
+        static SharedPtrType Create(const std::string& name, bool isPersistent = false, const T& defaultValue = T())
         {
             return Create(name, isPersistent, defaultValue, ConsoleVariableManager::Singleton());
         }
 
+        /**
+         *  ConsoleVariable<T>::Create implementation
+         */
         static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue, ConsoleVariableManager* consoleVariableManager)
         {
             BaseConsoleVariable::SharedPtrType regVar = consoleVariableManager->FindVariable(name);
@@ -208,8 +228,9 @@ namespace ASTEROID_NAMESPACE
             }
         }
 
-       
-
+        /**
+         *  Construct a console variable without registration
+         */
         ConsoleVariable(const std::string& name, bool isPersistent, const T& value)
             : BaseConsoleVariable(name, isPersistent), m_Value(value)
         {
@@ -219,16 +240,45 @@ namespace ASTEROID_NAMESPACE
         {
         }
 
+        /**
+         *  Implicit conversion to the internal value type.
+         */
         operator T&() { return m_Value; }
 
+        /**
+         *  Assign a value of type T to this console variable.
+         */
+        ConsoleVariable<T>& operator=(const T& other) 
+        {
+            m_Value = other; 
+            return *this;
+        }
+
+        /**
+         *  Override Base::ReadValue
+         */
         virtual void ReadValue(std::istream& is) override { is >> m_Value; }
+        /**
+         *  Override Base::WriteValue
+         */
         virtual void WriteValue(std::ostream& os) override { os << m_Value; }
 
+        /**
+         *  Called when this console variable is registered.
+         *  @remarks
+         *      For persistent console variables, calling this function restores the persistent value
+         *      from player prefs.
+         */
         void OnRegister(PlayerPrefs* playerPrefs, const T& defaultValue)
         {
             if (m_IsPersistent)
                 m_Value = playerPrefs->GetValue<T>(m_Name, defaultValue);
         }
+        /**
+         *  Called when this console variable is unregistered.
+         *  @remarks
+         *      For persistent console variables, calling this function saves the value to player prefs.
+         */
         virtual void OnUnregister(PlayerPrefs* playerPrefs) const override
         {
             if (m_IsPersistent)
