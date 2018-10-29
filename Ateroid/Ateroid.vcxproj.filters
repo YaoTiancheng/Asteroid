@@ -75,6 +75,9 @@
     <ClInclude Include="Util\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Util\STLAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">

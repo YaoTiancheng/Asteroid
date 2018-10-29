@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Asteroid.h"
 #include "WindowsApplication.h"
+#include "Util/STLAllocator.h"
 #include "Util/ConsoleVariable.h"
 #include "Util/Debug.h"
 #include "Util/PlayerPrefs.h"
@@ -128,6 +129,8 @@ namespace ASTEROID_NAMESPACE
         int32_t a = (*var2) + 6;
         *var2 = a;
         *var3 = *var2 + *var3;
+
+        std::vector<int, STLAllocator<int, Alloc<EAllocPolicy::eNormal>>> haha;
 
         return true;
     }
