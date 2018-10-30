@@ -78,6 +78,12 @@
     <ClInclude Include="Util\STLAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Util\Containers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Pointers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">

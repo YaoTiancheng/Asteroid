@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "WindowsApplication.h"
 #include "Util/STLAllocator.h"
 #include "Util/ConsoleVariable.h"

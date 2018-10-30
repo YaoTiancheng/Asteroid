@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "Object.h"
 #include "ObjectManager.h"
 

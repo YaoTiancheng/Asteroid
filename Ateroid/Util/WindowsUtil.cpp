@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "WindowsUtil.h"
 
 namespace ASTEROID_NAMESPACE

@@ -171,6 +171,8 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Precompile.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Util\Containers.h" />
+    <ClInclude Include="Util\Pointers.h" />
     <ClInclude Include="Util\STLAllocator.h" />
     <ClInclude Include="Util\Archives.h" />
     <ClInclude Include="Util\ConsoleVariable.h" />

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerPrefs.h"
+#include "Pointers.h"
 #include "String.h"
 
 namespace ASTEROID_NAMESPACE

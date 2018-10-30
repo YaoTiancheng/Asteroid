@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "SystemInfo.h"
 #include "Debug.h"
 #include "WindowsUtil.h"

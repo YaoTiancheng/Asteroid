@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "PlayerPrefs.h"
 #include "Archives.h"
 

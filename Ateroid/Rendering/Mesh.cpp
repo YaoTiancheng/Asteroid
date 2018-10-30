@@ -1,5 +1,4 @@
 #include "Precompile.h"
-#include "Asteroid.h"
 #include "Mesh.h"
 #include "Util/Debug.h"
 #include "RenderSystem.h"
