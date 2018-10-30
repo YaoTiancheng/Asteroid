@@ -120,21 +120,6 @@ namespace ASTEROID_NAMESPACE
         if (m_hWnd == NULL)
             return false;
 
-        ConsoleVariable<std::string>::SharedPtrType var = ConsoleVariable<std::string>::Create("Hello", true, "Fuck you");
-        ConsoleVariable<std::string>::SharedPtrType var1 = ConsoleVariable<std::string>::Create("Hello1", false, "Fuck you too");
-        ConsoleVariable<int32_t>::SharedPtrType var2 = ConsoleVariable<int32_t>::Create("Hello2");
-        ConsoleVariable<float>::SharedPtrType var3 = ConsoleVariable<float>::Create("Hello3");
-        ConsoleVariable<float>::SharedPtrType var4 = ConsoleVariable<float>::Create("Hello4");
-        int32_t a = (*var2) + 6;
-        *var2 = a;
-        *var3 = *var2 + *var3;
-
-        VectorA<int, 16> haha;
-        haha.reserve(64);
-
-        SharedPtr<int> integer = ASTEROID_ALLOCATE_SHARED(int, 0);
-        SharedPtr<float> single = ASTEROID_ALLOCATE_SHARED_A(float, 16, 0.f);
-
         return true;
     }
 
@@ -179,4 +164,6 @@ namespace ASTEROID_NAMESPACE
     void WindowsApplication::PerformMainLoop()
     {
     }
+
 }
+

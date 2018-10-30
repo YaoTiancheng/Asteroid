@@ -101,21 +101,21 @@ namespace ASTEROID_NAMESPACE
 
 #ifdef _DEBUG
     /** Assert and output a log if failed */
-    #define ASTEROID_ASSERT(c, m)                                   \
-        do {                                                        \
-            if (!(c)) {                                             \
-                Debug::Log(ELogType::eAssert, m, true);             \
-                Debug::Assert(_CRT_WIDE_(#c), __FILEW__, __LINE__); \
-            }                                                       \
+    #define ASTEROID_ASSERT(c, m)                                                               \
+        do {                                                                                    \
+            if (!(c)) {                                                                         \
+                ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eAssert, m, true); \
+                ASTEROID_NAMESPACE::Debug::Assert(_CRT_WIDE_(#c), __FILEW__, __LINE__);         \
+            }                                                                                   \
         } while(false)
 
     /** Assert and output a formatted log if failed */
-    #define ASTEROID_ASSERT_F(c, format, ...)                                   \
-        do {                                                                    \
-            if (!(c)) {                                                         \
-                Debug::LogFormat(ELogType::eAssert, format, true, __VA_ARGS__); \
-                Debug::Assert(_CRT_WIDE_(#c), __FILEW__, __LINE__);             \
-            }                                                                   \
+    #define ASTEROID_ASSERT_F(c, format, ...)                                                                           \
+        do {                                                                                                            \
+            if (!(c)) {                                                                                                 \
+                ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eAssert, format, true, __VA_ARGS__); \
+                ASTEROID_NAMESPACE::Debug::Assert(_CRT_WIDE_(#c), __FILEW__, __LINE__);                                 \
+            }                                                                                                           \
         } while(false)
 #else
     #define ASTEROID_ASSERT(c, m) ((void)0)
@@ -124,13 +124,13 @@ namespace ASTEROID_NAMESPACE
 
 #ifndef ASTEROID_NO_LOG_INFO
     /** Output an info log */
-    #define ASTEROID_LOG_INFO(STR) do { Debug::Log(ELogType::eInfo, STR, false); } while (false)
+    #define ASTEROID_LOG_INFO(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eInfo, STR, false); } while (false)
     /** Output a formatted info log */
-    #define ASTEROID_LOG_INFO_F(STR, ...) do { Debug::LogFormat(ELogType::eInfo, STR, false, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_INFO_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eInfo, STR, false, __VA_ARGS__); } while (false)
     /** Output an info log with stack trace */
-    #define ASTEROID_LOG_INFO_TRACE(STR) do { Debug::Log(ELogType::eInfo, STR, true); } while (false)
+    #define ASTEROID_LOG_INFO_TRACE(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eInfo, STR, true); } while (false)
     /** Output a formatted info log with stack trace*/
-    #define ASTEROID_LOG_INFO_TRACE_F(STR, ...) do { Debug::LogFormat(ELogType::eInfo, STR, true, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_INFO_TRACE_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eInfo, STR, true, __VA_ARGS__); } while (false)
 #else 
     #define ASTEROID_LOG_INFO(STR) ((void)0)
     #define ASTEROID_LOG_INFO_F(STR, ...) ((void)0)
@@ -140,13 +140,13 @@ namespace ASTEROID_NAMESPACE
 
 #ifndef ASTEROID_NO_LOG_WARNING
     /** Output an warning log */
-    #define ASTEROID_LOG_WARNING(STR) do { Debug::Log(ELogType::eWarning, STR, false); } while (false)
+    #define ASTEROID_LOG_WARNING(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eWarning, STR, false); } while (false)
     /** Output a formatted warning log */
-    #define ASTEROID_LOG_WARNING_F(STR, ...) do { Debug::LogFormat(ELogType::eWarning, STR, false, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_WARNING_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eWarning, STR, false, __VA_ARGS__); } while (false)
     /** Output an warning log with stack trace */
-    #define ASTEROID_LOG_WARNING_TRACE(STR) do { Debug::Log(ELogType::eWarning, STR, true); } while (false)
+    #define ASTEROID_LOG_WARNING_TRACE(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eWarning, STR, true); } while (false)
     /** Output a formatted warning log with stack trace*/
-    #define ASTEROID_LOG_warning_TRACE_F(STR, ...) do { Debug::LogFormat(ELogType::eWarning, STR, true, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_warning_TRACE_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eWarning, STR, true, __VA_ARGS__); } while (false)
 #else 
     #define ASTEROID_LOG_WARNING(STR) ((void)0)
     #define ASTEROID_LOG_WARNING_F(STR, ...) ((void)0)
@@ -156,13 +156,13 @@ namespace ASTEROID_NAMESPACE
 
 #ifndef ASTEROID_NO_LOG_ERROR
     /** Output an error log */
-    #define ASTEROID_LOG_ERROR(STR) do { Debug::Log(ELogType::eError, STR, false); } while (false)
+    #define ASTEROID_LOG_ERROR(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eError, STR, false); } while (false)
     /** Output a formatted error log */
-    #define ASTEROID_LOG_ERROR_F(STR, ...) do { Debug::LogFormat(ELogType::eError, STR, false, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_ERROR_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eError, STR, false, __VA_ARGS__); } while (false)
     /** Output an error log with stack trace */
-    #define ASTEROID_LOG_ERROR_TRACE(STR) do { Debug::Log(ELogType::eError, STR, true); } while (false)
+    #define ASTEROID_LOG_ERROR_TRACE(STR) do { ASTEROID_NAMESPACE::Debug::Log(ASTEROID_NAMESPACE::ELogType::eError, STR, true); } while (false)
     /** Output a formatted error log with stack trace */
-    #define ASTEROID_LOG_ERROR_TRACE_F(STR, ...) do { Debug::LogFormat(ELogType::eError, STR, true, __VA_ARGS__); } while (false)
+    #define ASTEROID_LOG_ERROR_TRACE_F(STR, ...) do { ASTEROID_NAMESPACE::Debug::LogFormat(ASTEROID_NAMESPACE::ELogType::eError, STR, true, __VA_ARGS__); } while (false)
 #else 
     #define ASTEROID_LOG_ERROR(STR) ((void)0)
     #define ASTEROID_LOG_ERROR_F(STR, ...) ((void)0)
