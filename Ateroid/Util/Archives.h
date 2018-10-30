@@ -4,8 +4,8 @@
 
 namespace ASTEROID_NAMESPACE
 {
-    typedef cereal::JSONOutputArchive JSONOutputArchive;
-    typedef cereal::JSONInputArchive JSONInputArchive;
+    using JSONOutputArchive = cereal::JSONOutputArchive;
+    using JSONInputArchive  = cereal::JSONInputArchive;
 }
 
 #ifndef ASTEROID_ARCHIVE_MAKE_NVP

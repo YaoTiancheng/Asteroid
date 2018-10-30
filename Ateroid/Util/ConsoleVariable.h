@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerPrefs.h"
+#include "String.h"
 
 namespace ASTEROID_NAMESPACE
 {
@@ -15,7 +16,7 @@ namespace ASTEROID_NAMESPACE
         typedef std::shared_ptr<BaseConsoleVariable> SharedPtrType;
 
     public:
-        BaseConsoleVariable(const std::string& name, bool isPersistent)
+        BaseConsoleVariable(const String& name, bool isPersistent)
             : m_Name(name), m_IsPersistent(isPersistent)
         {
         }
@@ -26,16 +27,16 @@ namespace ASTEROID_NAMESPACE
         /** Write value to an output stream. */
         virtual void WriteValue(std::ostream& os) = 0;
 
-        const std::string&  Name() const { return m_Name; }
-        bool                IsPersistent() const { return m_IsPersistent; }
+        const String&   Name() const { return m_Name; }
+        bool            IsPersistent() const { return m_IsPersistent; }
 
     private:
         /** Called when this variable is unregistered from ConsoleVariableManager. */
         virtual void OnUnregister(PlayerPrefs* playerPrefs) const = 0;
 
     protected:
-        std::string m_Name;
-        bool        m_IsPersistent;
+        String  m_Name;
+        bool    m_IsPersistent;
     };
 
 
@@ -99,7 +100,7 @@ namespace ASTEROID_NAMESPACE
          *      The variable being unregistered will not be searched globally through 
          *      ConsoleVariableManager any longer.
          */
-        void Unregister(const std::string& name)
+        void Unregister(const String& name)
         {
             auto it = m_Variables.find(name);
             if (it != m_Variables.end())
@@ -112,7 +113,7 @@ namespace ASTEROID_NAMESPACE
         /**
          *  Check if a variable with the given name is registered.
          */
-        bool HasVariable(const std::string& name) const
+        bool HasVariable(const String& name) const
         {
             return m_Variables.find(name) != m_Variables.end();
         }
@@ -122,7 +123,7 @@ namespace ASTEROID_NAMESPACE
          *  @return
          *      Registered variable with given name. nullptr if not found.
          */
-        BaseConsoleVariable::SharedPtrType FindVariable(const std::string& name) const
+        BaseConsoleVariable::SharedPtrType FindVariable(const String& name) const
         {
             BaseConsoleVariable::SharedPtrType pVar = nullptr;
             auto it = m_Variables.find(name);
@@ -162,7 +163,7 @@ namespace ASTEROID_NAMESPACE
     private:
         static ConsoleVariableManager* _Singleton;
 
-        using VariableMap = std::unordered_map<std::string, BaseConsoleVariable::SharedPtrType>;
+        using VariableMap = UnorderedMap<String, BaseConsoleVariable::SharedPtrType>;
         VariableMap     m_Variables;
         PlayerPrefs*    m_PlayerPrefs;
     };
@@ -175,7 +176,7 @@ namespace ASTEROID_NAMESPACE
     class ConsoleVariable : public BaseConsoleVariable
     {
     public:
-        typedef std::shared_ptr<ConsoleVariable<T>> SharedPtrType;
+        typedef SharedPtr<ConsoleVariable<T>> SharedPtrType;
 
     public:
         ASTEROID_NON_COPYABLE(ConsoleVariable)
@@ -193,7 +194,7 @@ namespace ASTEROID_NAMESPACE
          *      If the name doesn't match any registered console variables, calling this function will create a new console variable,
          *      assign it a default value and register it.
          */
-        static SharedPtrType Create(const std::string& name, bool isPersistent = false, const T& defaultValue = T())
+        static SharedPtrType Create(const String& name, bool isPersistent = false, const T& defaultValue = T())
         {
             return Create(name, isPersistent, defaultValue, ConsoleVariableManager::Singleton());
         }
@@ -201,12 +202,12 @@ namespace ASTEROID_NAMESPACE
         /**
          *  ConsoleVariable<T>::Create implementation
          */
-        static SharedPtrType Create(const std::string& name, bool isPersistent, const T& defaultValue, ConsoleVariableManager* consoleVariableManager)
+        static SharedPtrType Create(const String& name, bool isPersistent, const T& defaultValue, ConsoleVariableManager* consoleVariableManager)
         {
             BaseConsoleVariable::SharedPtrType regVar = consoleVariableManager->FindVariable(name);
             if (regVar == nullptr)
             {
-                SharedPtrType var = std::make_shared<ConsoleVariable<T>>(name, isPersistent, defaultValue);
+                SharedPtrType var = ASTEROID_ALLOCATE_SHARED(ConsoleVariable<T>, name, isPersistent, defaultValue);
                 consoleVariableManager->Register(var);
                 var->OnRegister(consoleVariableManager->GetPlayerPrefs(), defaultValue);
                 return var;
@@ -231,7 +232,7 @@ namespace ASTEROID_NAMESPACE
         /**
          *  Construct a console variable without registration
          */
-        ConsoleVariable(const std::string& name, bool isPersistent, const T& value)
+        ConsoleVariable(const String& name, bool isPersistent, const T& value)
             : BaseConsoleVariable(name, isPersistent), m_Value(value)
         {
         }

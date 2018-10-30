@@ -4,9 +4,9 @@
 
 namespace ASTEROID_NAMESPACE
 {
-    std::string WindowsUtil::GetLastErrorString()
+    String WindowsUtil::GetLastErrorString()
     {
-        std::string result;
+        String result;
 
         DWORD dw = GetLastError();
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "String.h"
+
 namespace ASTEROID_NAMESPACE
 {
     /**
@@ -15,6 +17,6 @@ namespace ASTEROID_NAMESPACE
         /**
          *  Get a translated message of the last error code.
          */
-        static std::string GetLastErrorString();
+        static String GetLastErrorString();
     };
 }
